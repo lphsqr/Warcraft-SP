@@ -5,6 +5,7 @@ import contextlib
 
 # Source.Python imports
 from events import Event
+from listeners.tick import TickRepeat
 from messages import SayText2
 from paths import PLUGIN_DATA_PATH
 from players.helpers import index_from_userid
@@ -191,6 +192,10 @@ heroes = {hero.class_id: hero for hero in warcraft.heroes.get_heroes()}
 
 # Database wrapper for accessing the Warcraft database
 database = warcraft.database.SQLite(PLUGIN_DATA_PATH / 'warcraft.db')
+
+# A tick repeat for saving everyone's data every 4 minutes
+_data_save_repeat = TickRepeat(_save_all_data)
+_data_save_repeat.start(240, 0)
 
 # Translations for the Warcraft plugin
 _tr = LangStrings('warcraft')
