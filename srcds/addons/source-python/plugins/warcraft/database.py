@@ -37,7 +37,7 @@ class _Database:
                 class_id TEXT NOT NULL,
                 level INTEGER NOT NULL,
                 xp INTEGER NOT NULL,
-                FOREIGN KEY (steamid) REFERENCES player(steamid),
+                FOREIGN KEY (steamid) REFERENCES players(steamid),
                 PRIMARY KEY (steamid, class_id)
             )''')
         self._connection.execute('''CREATE TABLE IF NOT EXISTS skills (

@@ -100,9 +100,9 @@ class Hero(Entity, metaclass=_HeroMeta):
     @xp.setter
     def xp(self, value):
         if value < self.xp:
-            self._take_xp(self.xp - value)
+            self.take_xp(self.xp - value)
         if value > self.xp:
-            self._give_xp(value - self.xp)
+            self.give_xp(value - self.xp)
 
     def take_xp(self, amount):
         """Take experience points from the hero.
@@ -114,7 +114,7 @@ class Hero(Entity, metaclass=_HeroMeta):
         :param int amount:
             Amount of xp to take from the hero
         """
-        if amount > 0:
+        if amount < 0:
             raise ValueError(
                 "take_xp() received a negative value, use give_xp() instead.")
 
@@ -123,7 +123,7 @@ class Hero(Entity, metaclass=_HeroMeta):
 
         while self.level > 0 and self._xp < 0:
             self.level -= 1
-            self._xp += self.required_xp
+            self._xp += self.xp_quota
 
         level_difference = initial_level - self.level
         if level_difference > 0:
@@ -148,8 +148,8 @@ class Hero(Entity, metaclass=_HeroMeta):
         initial_level = self.level
         self._xp += amount
 
-        while not self.on_max_level() and self._xp >= self.required_xp:
-            self._xp -= self.required_xp
+        while not self.on_max_level() and self._xp >= self.xp_quota:
+            self._xp -= self.xp_quota
             self._level += 1
 
         level_difference = self.level - initial_level
