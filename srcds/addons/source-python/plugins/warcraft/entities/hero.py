@@ -100,9 +100,9 @@ class Hero(Entity, metaclass=_HeroMeta):
     @xp.setter
     def xp(self, value):
         if value < self.xp:
-            self._take_xp(self.xp - value)
+            self.take_xp(self.xp - value)
         if value > self.xp:
-            self._give_xp(value - self.xp)
+            self.give_xp(value - self.xp)
 
     def take_xp(self, amount):
         """Take experience points from the hero.
@@ -114,7 +114,7 @@ class Hero(Entity, metaclass=_HeroMeta):
         :param int amount:
             Amount of xp to take from the hero
         """
-        if amount > 0:
+        if amount < 0:
             raise ValueError(
                 "take_xp() received a negative value, use give_xp() instead.")
 
