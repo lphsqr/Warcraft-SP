@@ -4,6 +4,7 @@
 from events import Event
 
 # Warcraft imports
+import warcraft.heroes
 import warcraft.player
 
 
@@ -65,3 +66,6 @@ def _give_xp_from_kill(event):
 
 # A dictionary of all the players, uses indexes as keys
 players = PlayerDictionary(warcraft.player.Player)
+
+# A dictionary of the heroes from heroes.__init__.get_heroes
+heroes = {hero.class_id: hero for hero in warcraft.heroes.get_heroes()}
