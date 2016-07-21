@@ -41,7 +41,7 @@ def _new_player(index):
 
     # Give the player all heroes available by his total level
     total_level = player.calculate_total_level()
-    for hero_id, hero_class in _heroes.items():
+    for hero_id, hero_class in heroes.items():
         if hero_id in player.heroes:
             continue
         if hero_class.required_level <= total_level:
