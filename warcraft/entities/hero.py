@@ -6,6 +6,7 @@ import math
 
 # Warcraft imports
 from warcraft.entities.entity import Entity
+import warcraft.listeners
 
 __all__ = (
     'Hero',
@@ -116,10 +117,18 @@ class Hero(Entity, metaclass=_HeroMeta):
         if amount > 0:
             raise ValueError(
                 "take_xp() received a negative value, use give_xp() instead.")
+
+        initial_level = self.level
         self._xp -= amount
+
         while self.level > 0 and self._xp < 0:
             self.level -= 1
             self._xp += self.required_xp
+
+        level_difference = initial_level - self.level
+        if level_difference > 0:
+            warcraft.listeners.OnHeroLevelDown.manager.notify(
+                hero=self, player=self.owner, levels=level_difference)
 
     def give_xp(self, amount):
         """Give experience points to the hero.
@@ -135,10 +144,18 @@ class Hero(Entity, metaclass=_HeroMeta):
         if amount < 0:
             raise ValueError(
                 "give_xp() received a negative value, use take_xp() instead.")
+
+        initial_level = self.level
         self._xp += amount
+
         while not self.on_max_level() and self._xp >= self.required_xp:
             self._xp -= self.required_xp
             self._level += 1
+
+        level_difference = self.level - initial_level
+        if level_difference > 0:
+            warcraft.listeners.OnHeroLevelUp.manager.notify(
+                hero=self, player=self.owner, levels=level_difference)
 
     @property
     def xp_quota(self):
@@ -172,6 +189,8 @@ class Hero(Entity, metaclass=_HeroMeta):
             raise ValueError(
                 "Unable to upgrade skill {0}.".format(skill))
         skill.level += 1
+        warcraft.listeners.OnSkillUpgrade.manager.notify(
+            skill=skill, hero=self, player=self.owner)
 
     def can_downgrade_skill(self, skill):
         """Check if a hero can downgrade a skill.
@@ -192,6 +211,8 @@ class Hero(Entity, metaclass=_HeroMeta):
             raise ValueError(
                 "Unable to downgrade skill {0}.".format(skill))
         skill.level -= 1
+        warcraft.listeners.OnSkillDowngrade.manager.notify(
+            skill=skill, hero=self, player=self.owner)
 
     def execute_skills(self, event_name, event_args):
         """Execute hero's skills for an event.
