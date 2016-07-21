@@ -123,7 +123,7 @@ class Hero(Entity, metaclass=_HeroMeta):
 
         while self.level > 0 and self._xp < 0:
             self.level -= 1
-            self._xp += self.required_xp
+            self._xp += self.xp_quota
 
         level_difference = initial_level - self.level
         if level_difference > 0:
@@ -148,8 +148,8 @@ class Hero(Entity, metaclass=_HeroMeta):
         initial_level = self.level
         self._xp += amount
 
-        while not self.on_max_level() and self._xp >= self.required_xp:
-            self._xp -= self.required_xp
+        while not self.on_max_level() and self._xp >= self.xp_quota:
+            self._xp -= self.xp_quota
             self._level += 1
 
         level_difference = self.level - initial_level
