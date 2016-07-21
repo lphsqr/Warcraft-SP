@@ -6,6 +6,7 @@ from listeners import ListenerManagerDecorator
 
 __all__ = (
     'OnHeroLevelUp',
+    'OnHeroLevelDown',
     'OnSkillUpgrade',
     'OnSkillDowngrade',
 )
