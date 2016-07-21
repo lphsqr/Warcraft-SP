@@ -55,12 +55,15 @@ class Entity:
     max_level = math.inf
     required_level = 0
 
-    def __init__(self, level=0):
+    def __init__(self, owner, level=0):
         """Initialize the entity.
 
+        :param object owner:
+            The owner of the entity
         :param int level:
             Initial level of the entity
         """
+        self.owner = owner
         self._level = level
 
     @property
