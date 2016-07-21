@@ -5,8 +5,10 @@ import contextlib
 
 # Source.Python imports
 from events import Event
+from messages import SayText2
 from paths import PLUGIN_DATA_PATH
 from players.helpers import index_from_userid
+from translations.strings import LangStrings
 
 # Warcraft imports
 import warcraft.database
@@ -160,6 +162,24 @@ def _give_xp_from_kill(event):
 
 
 # ======================================================================
+# >> MISCELLANEOUS CALLBACKS
+# ======================================================================
+
+@Event('player_spawn')
+def _send_hero_info_message(event):
+    """Send the player his current hero's information."""
+    player = players.from_userid(event['userid'])
+    if player.steamid != 'BOT':
+        _hero_info_message.send(player.index, hero=player.hero)
+
+
+@warcraft.listeners.OnHeroLevelUp
+def _send_level_up_message(hero, player, levels):
+    """Send a level up message to the player whose hero leveled up."""
+    _level_up_message.send(player.index, levels=levels, hero=hero)
+
+
+# ======================================================================
 # >> GLOBALS
 # ======================================================================
 
@@ -171,3 +191,8 @@ heroes = {hero.class_id: hero for hero in warcraft.heroes.get_heroes()}
 
 # Database wrapper for accessing the Warcraft database
 database = warcraft.database.SQLite(PLUGIN_DATA_PATH / 'warcraft.db')
+
+# Translations for the Warcraft plugin
+_tr = LangStrings('warcraft')
+_hero_info_message = SayText2(_tr['Hero Info'])
+_level_up_message = SayText2(_tr['Level Up'])
