@@ -44,3 +44,7 @@ class Player(easyplayer.Player):
             raise ValueError(
                 "Hero {0} not owned by player.".format(value))
         self._hero = value
+
+    def calculate_total_level(self):
+        """Calculate the total level of all of player's heroes."""
+        return sum(hero.level for hero in self.heroes.values()) 
