@@ -4,6 +4,10 @@
 import funcools
 import time
 
+__all__ = (
+    'cooldown',
+    )
+
 
 def _static_cooldown(cooldown):
     """Return a cooldown.
