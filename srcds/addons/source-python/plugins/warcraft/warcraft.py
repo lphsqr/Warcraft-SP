@@ -6,6 +6,10 @@ import contextlib
 # Source.Python imports
 from events import Event
 from listeners.tick import TickRepeat
+from menus import ListMenu
+from menus import ListOption
+from menus import PagedMenu
+from menus import PagedOption
 from messages import SayText2
 from paths import PLUGIN_DATA_PATH
 from players.helpers import index_from_userid
@@ -201,3 +205,160 @@ _data_save_repeat.start(240, 0)
 _tr = LangStrings('warcraft')
 _hero_info_message = SayText2(_tr['Hero Info'])
 _level_up_message = SayText2(_tr['Level Up'])
+
+
+# ======================================================================
+# >> MENUS
+# ======================================================================
+
+def _on_main_menu_build(menu, player_index):
+    """Build the main menu."""
+    player = players[player_index]
+    menu.clear()
+    menu.description = player.hero.name
+    menu.extend([
+        PagedOption(_tr['Change Hero'], change_hero_menu),
+        PagedOption(_tr['Upgrade Skills'], upgrade_skills_menu),
+        PagedOption(_tr['Downgrade Skills'], downgrade_skills_menu),
+        PagedOption(_tr['Hero Infos'], hero_infos_menu),
+    ])
+
+def _on_main_menu_select(menu, player_index, choice):
+    """React to a main menu selection."""
+    player = players[player_index]
+    return choice.value
+
+main_menu = PagedMenu(
+    title=_tr['Main Menu'],
+    build_callback=_on_main_menu_build,
+    select_callback=_on_main_menu_select,
+)
+
+
+def _on_change_hero_menu_build(menu, player_index):
+    """Build the change hero menu."""
+    player = players[player_index]
+    menu.clear()
+    menu.description = player.hero.name
+    total_level = player.calculate_total_level()
+    for hero_id, hero_class in heroes.items():
+        if hero_id in player.heroes or hero_class.required_level <= total_level:
+            text = _tr['Owned Hero Text'].get_string(hero=player.hero)
+            menu.append(PagedOption(text, hero_class, True, True))
+        else:
+            text = _tr['Unowned Hero Text'].get_string(hero=hero_class)
+            menu.append(PagedOption(text, None, False, False))
+
+def _on_change_hero_menu_select(menu, player_index, choice):
+    """React to a change hero menu selection."""
+    player = players[player_index]
+    hero_id = choice.value.class_id
+    if hero_id == player.hero.class_id:
+        return
+    if hero_id not in player.heroes:
+        player.heroes[hero_id] = choice.value(player)
+    player.hero = player.heroes[hero_id]
+    player.client_command('kill', True)
+
+change_hero_menu = PagedMenu(
+    title=_tr['Change Hero'],
+    build_callback=_on_change_hero_menu_build,
+    select_callback=_on_change_hero_menu_select,
+    parent_menu=main_menu,
+)
+
+
+def _on_upgrade_skills_menu_build(menu, player_index):
+    """Build the upgrade skills menu."""
+    player = players[player_index]
+    hero = player.hero
+    menu.clear()
+    menu.title = hero.name
+    menu.description = _tr['Skill Points'].get_string(skill_points=hero.skill_points)
+    for skill in hero.skills.values():
+        if skill.required_level <= hero.level:
+            text = _tr['Owned Skill Text'].get_string(skill=skill)
+        else:
+            text = _tr['Unowned Skill Text'].get_string(skill=skill)
+        can_upgrade = hero.can_upgrade_skill(skill)
+        menu.append(PagedOption(text, skill, can_upgrade, can_upgrade))
+
+def _on_upgrade_skills_menu_select(menu, player_index, choice):
+    """React to an upgrade skills menu selection."""
+    hero = players[player_index].hero
+    if hero.can_upgrade_skill(choice.value):
+        hero.upgrade_skill(choice.value)
+    return menu
+
+upgrade_skills_menu = PagedMenu(
+    parent_menu=main_menu,
+    build_callback=_on_upgrade_skills_menu_build,
+    select_callback=_on_upgrade_skills_menu_select,
+)
+
+
+def _on_downgrade_skills_menu_build(menu, player_index):
+    """Build the downgrade skills menu."""
+    player = players[player_index]
+    hero = player.hero
+    menu.clear()
+    menu.title = hero.name
+    menu.description = _tr['Skill Points'].get_string(skill_points=hero.skill_points)
+    for skill in hero.skills.values():
+        if skill.required_level <= hero.level:
+            text = _tr['Owned Skill Text'].get_string(skill=skill)
+        else:
+            text = _tr['Unowned Skill Text'].get_string(skill=skill)
+        can_downgrade = hero.can_downgrade_skill(skill)
+        menu.append(PagedOption(text, skill, can_downgrade, can_downgrade))
+
+def _on_downgrade_skills_menu_select(menu, player_index, choice):
+    """React to a downgrade skills menu selection."""
+    hero = players[player_index].hero
+    if hero.can_downgrade_skill(choice.value):
+        hero.downgrade_skill(choice.value)
+    return menu
+
+downgrade_skills_menu = PagedMenu(
+    parent_menu=main_menu,
+    build_callback=_on_downgrade_skills_menu_build,
+    select_callback=_on_downgrade_skills_menu_select,
+)
+
+
+def _on_hero_infos_menu_build(menu, player_index):
+    """Build the hero infos menu."""
+    menu.clear()
+    for hero_class in heroes.values():
+        menu.append(PagedOption(hero_class.name, hero_class))
+
+def _on_hero_infos_menu_select(menu, player_index, choice):
+    """React to a hero infos menu selection."""
+    return HeroInfoMenu(choice.value, parent_menu=hero_infos_menu)
+
+hero_infos_menu = PagedMenu(
+    title=_tr['Hero Infos'],
+    parent_menu=main_menu,
+    build_callback=_on_hero_infos_menu_build,
+    select_callback=_on_hero_infos_menu_select,
+)
+
+
+class HeroInfoMenu(ListMenu):
+    """A menu class for displaying individual hero's information."""
+
+    def __init__(self, hero_class, *args, **kwargs):
+        """Initialize the hero info menu with a hero."""
+        super().__init__(*args, **kwargs)
+        self.hero_class = hero_class
+        self.items_per_page = 3
+        self.build_callback = self._build_callback
+
+    @staticmethod
+    def _build_callback(menu, player_index):
+        """Build the menu."""
+        menu.clear()
+        menu.title = menu.hero_class.name
+        for skill_cls in menu.hero_class.skill_classes:
+            text = '{s.name}\n{s.description}'.format(s=skill_cls)
+            menu.append(ListOption(text))
