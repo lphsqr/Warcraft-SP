@@ -1,7 +1,7 @@
 """A module with :func`cooldown` function for method cooldowns."""
 
 # Python 3 imports
-import funcools
+import functools
 import time
 
 __all__ = (
