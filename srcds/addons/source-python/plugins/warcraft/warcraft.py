@@ -12,6 +12,7 @@ from menus import PagedMenu
 from menus import PagedOption
 from messages import SayText2
 from paths import PLUGIN_DATA_PATH
+from players.dictionary import PlayerDictionary
 from players.helpers import index_from_userid
 from translations.strings import LangStrings
 
@@ -40,7 +41,7 @@ def _new_player(index):
 
     # Give the player all heroes available by his total level
     total_level = player.calculate_total_level()
-    for hero_id, hero_class in _heroes.items():
+    for hero_id, hero_class in heroes.items():
         if hero_id in player.heroes:
             continue
         if hero_class.required_level <= total_level:
@@ -189,7 +190,7 @@ def _send_level_up_message(hero, player, levels):
 # ======================================================================
 
 # A dictionary of all the players, uses indexes as keys
-players = PlayerDictionary(warcraft.player.Player)
+players = PlayerDictionary(_new_player)
 
 # A dictionary of the heroes from heroes.__init__.get_heroes
 heroes = {hero.class_id: hero for hero in warcraft.heroes.get_heroes()}
