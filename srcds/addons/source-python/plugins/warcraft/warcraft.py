@@ -4,6 +4,9 @@
 import contextlib
 
 # Source.Python imports
+from commands import CommandReturn
+from commands.client import ClientCommand
+from commands.say import SayCommand
 from events import Event
 from listeners.tick import TickRepeat
 from menus import ListMenu
@@ -206,6 +209,35 @@ _data_save_repeat.start(240, 0)
 _tr = LangStrings('warcraft')
 _hero_info_message = SayText2(_tr['Hero Info'])
 _level_up_message = SayText2(_tr['Level Up'])
+
+
+# ======================================================================
+# >> SAY COMMANDS
+# ======================================================================
+
+@ClientCommand('warcraft')
+@SayCommand('warcraft')
+def _say_warcraft_command(command, player_index, only=None):
+    main_menu.send(player_index)
+    return CommandReturn.BLOCK
+
+@ClientCommand('changehero')
+@SayCommand('changehero')
+def _say_change_hero_command(command, player_index, only=None):
+    change_hero_menu.send(player_index)
+    return CommandReturn.BLOCK
+
+@ClientCommand('spendskills')
+@SayCommand('spendskills')
+def _say_spend_skills_command(command, player_index, only=None):
+    upgrade_skills_menu.send(player_index)
+    return CommandReturn.BLOCK
+
+@ClientCommand('resetskills')
+@SayCommand('resetskills')
+def _say_reset_skills_command(command, player_index, only=None):
+    downgrade_skills_menu.send(player_index)
+    return CommandReturn.BLOCK
 
 
 # ======================================================================
