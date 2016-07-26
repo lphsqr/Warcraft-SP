@@ -257,13 +257,16 @@ def _on_main_menu_build(menu, player_index):
     menu.extend([
         PagedOption(_tr['Change Hero'], change_hero_menu),
         PagedOption(_tr['Upgrade Skills'], upgrade_skills_menu),
-        PagedOption(_tr['Downgrade Skills'], downgrade_skills_menu),
+        PagedOption(_tr['Reset Skills'], 'reset'),
         PagedOption(_tr['Hero Infos'], hero_infos_menu),
     ])
 
 def _on_main_menu_select(menu, player_index, choice):
     """React to a main menu selection."""
     player = players[player_index]
+    if choice.value == 'reset':
+        player.hero.reset_skills()
+        return menu
     return choice.value
 
 main_menu = PagedMenu(
@@ -332,35 +335,6 @@ upgrade_skills_menu = PagedMenu(
     parent_menu=main_menu,
     build_callback=_on_upgrade_skills_menu_build,
     select_callback=_on_upgrade_skills_menu_select,
-)
-
-
-def _on_downgrade_skills_menu_build(menu, player_index):
-    """Build the downgrade skills menu."""
-    player = players[player_index]
-    hero = player.hero
-    menu.clear()
-    menu.title = hero.name
-    menu.description = _tr['Skill Points'].get_string(skill_points=hero.skill_points)
-    for skill in hero.skills.values():
-        if skill.required_level <= hero.level:
-            text = _tr['Owned Skill Text'].get_string(skill=skill)
-        else:
-            text = _tr['Unowned Skill Text'].get_string(skill=skill)
-        can_downgrade = hero.can_downgrade_skill(skill)
-        menu.append(PagedOption(text, skill, can_downgrade, can_downgrade))
-
-def _on_downgrade_skills_menu_select(menu, player_index, choice):
-    """React to a downgrade skills menu selection."""
-    hero = players[player_index].hero
-    if hero.can_downgrade_skill(choice.value):
-        hero.downgrade_skill(choice.value)
-    return menu
-
-downgrade_skills_menu = PagedMenu(
-    parent_menu=main_menu,
-    build_callback=_on_downgrade_skills_menu_build,
-    select_callback=_on_downgrade_skills_menu_select,
 )
 
 
