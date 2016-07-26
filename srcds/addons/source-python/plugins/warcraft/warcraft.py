@@ -207,13 +207,13 @@ def _changehero_command_callback(command, player_index, only=None):
 @ClientCommand('spendskills')
 @SayCommand('spendskills')
 def _spendskills_command_callback(command, player_index, only=None):
-    upgrade_skills_menu.send(player_index)
+    spend_skills_menu.send(player_index)
     return CommandReturn.BLOCK
 
 @ClientCommand('resetskills')
 @SayCommand('resetskills')
 def _resetskills_command_callback(command, player_index, only=None):
-    downgrade_skills_menu.send(player_index)
+    players[player_index].hero.reset_skills()
     return CommandReturn.BLOCK
 
 @ClientCommand('heroinfo')
