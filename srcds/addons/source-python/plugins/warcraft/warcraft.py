@@ -189,30 +189,7 @@ def _send_level_up_message(hero, player, levels):
 
 
 # ======================================================================
-# >> GLOBALS
-# ======================================================================
-
-# A dictionary of all the players, uses indexes as keys
-players = PlayerDictionary(_new_player)
-
-# A dictionary of the heroes from heroes.__init__.get_heroes
-heroes = {hero.class_id: hero for hero in warcraft.heroes.get_heroes()}
-
-# Database wrapper for accessing the Warcraft database
-database = warcraft.database.SQLite(PLUGIN_DATA_PATH / 'warcraft.db')
-
-# A tick repeat for saving everyone's data every 4 minutes
-_data_save_repeat = TickRepeat(_save_all_data)
-_data_save_repeat.start(240, 0)
-
-# Translations for the Warcraft plugin
-_tr = LangStrings('warcraft')
-_hero_info_message = SayText2(_tr['Hero Info'])
-_level_up_message = SayText2(_tr['Level Up'])
-
-
-# ======================================================================
-# >> SAY COMMANDS
+# >> CLIENT/SAY COMMANDS
 # ======================================================================
 
 @ClientCommand('warcraft')
@@ -238,6 +215,29 @@ def _say_spend_skills_command(command, player_index, only=None):
 def _say_reset_skills_command(command, player_index, only=None):
     downgrade_skills_menu.send(player_index)
     return CommandReturn.BLOCK
+
+
+# ======================================================================
+# >> GLOBALS
+# ======================================================================
+
+# A dictionary of all the players, uses indexes as keys
+players = PlayerDictionary(_new_player)
+
+# A dictionary of the heroes from heroes.__init__.get_heroes
+heroes = {hero.class_id: hero for hero in warcraft.heroes.get_heroes()}
+
+# Database wrapper for accessing the Warcraft database
+database = warcraft.database.SQLite(PLUGIN_DATA_PATH / 'warcraft.db')
+
+# A tick repeat for saving everyone's data every 4 minutes
+_data_save_repeat = TickRepeat(_save_all_data)
+_data_save_repeat.start(240, 0)
+
+# Translations for the Warcraft plugin
+_tr = LangStrings('warcraft')
+_hero_info_message = SayText2(_tr['Hero Info'])
+_level_up_message = SayText2(_tr['Level Up'])
 
 
 # ======================================================================
