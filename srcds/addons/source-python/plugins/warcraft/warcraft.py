@@ -219,7 +219,8 @@ def _resetskills_command_callback(command, player_index, only=None):
 @ClientCommand('heroinfo')
 @SayCommand('heroinfo')
 def _heroinfo_command_callback(command, player_index, only=None):
-    _hero_info_message.send(player_index, hero=players[player_index].hero)    
+    _hero_info_message.send(player_index, hero=players[player_index].hero)
+    return CommandReturn.BLOCK
 
 
 # ======================================================================
