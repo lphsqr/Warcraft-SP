@@ -55,7 +55,7 @@ class _HeroMeta(type):
         """
         instance = super().__call__(*args, **kwargs)
         for skill_class in cls.skill_classes:
-            instance.skills[skill_class.class_id] = skill_class()
+            instance.skills[skill_class.class_id] = skill_class(instance)
         return instance
 
 
