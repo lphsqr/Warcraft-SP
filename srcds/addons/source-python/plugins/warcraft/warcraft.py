@@ -216,6 +216,11 @@ def _resetskills_command_callback(command, player_index, only=None):
     downgrade_skills_menu.send(player_index)
     return CommandReturn.BLOCK
 
+@ClientCommand('heroinfo')
+@SayCommand('heroinfo')
+def _heroinfo_command_callback(command, player_index, only=None):
+    _hero_info_message.send(player_index, hero=players[player_index].hero)    
+
 
 # ======================================================================
 # >> GLOBALS
