@@ -256,7 +256,7 @@ def _on_main_menu_build(menu, player_index):
     menu.description = player.hero.name
     menu.extend([
         PagedOption(_tr['Change Hero'], change_hero_menu),
-        PagedOption(_tr['Upgrade Skills'], upgrade_skills_menu),
+        PagedOption(_tr['Spend Skills'], spend_skills_menu),
         PagedOption(_tr['Reset Skills'], 'reset'),
         PagedOption(_tr['Hero Infos'], hero_infos_menu),
     ])
@@ -309,8 +309,8 @@ change_hero_menu = PagedMenu(
 )
 
 
-def _on_upgrade_skills_menu_build(menu, player_index):
-    """Build the upgrade skills menu."""
+def _on_spend_skills_menu_build(menu, player_index):
+    """Build the spend skills menu."""
     player = players[player_index]
     hero = player.hero
     menu.clear()
@@ -324,17 +324,17 @@ def _on_upgrade_skills_menu_build(menu, player_index):
         can_upgrade = hero.can_upgrade_skill(skill)
         menu.append(PagedOption(text, skill, can_upgrade, can_upgrade))
 
-def _on_upgrade_skills_menu_select(menu, player_index, choice):
-    """React to an upgrade skills menu selection."""
+def _on_spend_skills_menu_select(menu, player_index, choice):
+    """React to an spend skills menu selection."""
     hero = players[player_index].hero
     if hero.can_upgrade_skill(choice.value):
         hero.upgrade_skill(choice.value)
     return menu
 
-upgrade_skills_menu = PagedMenu(
+spend_skills_menu = PagedMenu(
     parent_menu=main_menu,
-    build_callback=_on_upgrade_skills_menu_build,
-    select_callback=_on_upgrade_skills_menu_select,
+    build_callback=_on_spend_skills_menu_build,
+    select_callback=_on_spend_skills_menu_select,
 )
 
 
