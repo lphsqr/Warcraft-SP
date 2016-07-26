@@ -214,6 +214,13 @@ class Hero(Entity, metaclass=_HeroMeta):
         warcraft.listeners.OnSkillDowngrade.manager.notify(
             skill=skill, hero=self, player=self.owner)
 
+    def reset_skills(self):
+        """Reset all of the hero's skills back to level zero."""
+        for skill in self.skills:
+            skill.level = 0
+            warcraft.listeners.OnSkillDowngrade.manager.notify(
+                skill=skill, hero=self, player=self.owner)
+
     def execute_skills(self, event_name, event_args):
         """Execute hero's skills for an event.
 
