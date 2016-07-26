@@ -216,7 +216,7 @@ class Hero(Entity, metaclass=_HeroMeta):
 
     def reset_skills(self):
         """Reset all of the hero's skills back to level zero."""
-        for skill in self.skills:
+        for skill in self.skills.values():
             skill.level = 0
             warcraft.listeners.OnSkillDowngrade.manager.notify(
                 skill=skill, hero=self, player=self.owner)
