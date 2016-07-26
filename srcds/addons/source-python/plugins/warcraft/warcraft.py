@@ -194,25 +194,25 @@ def _send_level_up_message(hero, player, levels):
 
 @ClientCommand('warcraft')
 @SayCommand('warcraft')
-def _say_warcraft_command(command, player_index, only=None):
+def _warcraft_command_callback(command, player_index, only=None):
     main_menu.send(player_index)
     return CommandReturn.BLOCK
 
 @ClientCommand('changehero')
 @SayCommand('changehero')
-def _say_change_hero_command(command, player_index, only=None):
+def _changehero_command_callback(command, player_index, only=None):
     change_hero_menu.send(player_index)
     return CommandReturn.BLOCK
 
 @ClientCommand('spendskills')
 @SayCommand('spendskills')
-def _say_spend_skills_command(command, player_index, only=None):
+def _spendskills_command_callback(command, player_index, only=None):
     upgrade_skills_menu.send(player_index)
     return CommandReturn.BLOCK
 
 @ClientCommand('resetskills')
 @SayCommand('resetskills')
-def _say_reset_skills_command(command, player_index, only=None):
+def _resetskills_command_callback(command, player_index, only=None):
     downgrade_skills_menu.send(player_index)
     return CommandReturn.BLOCK
 
