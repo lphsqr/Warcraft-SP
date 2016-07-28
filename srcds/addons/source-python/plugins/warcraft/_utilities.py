@@ -1,7 +1,9 @@
 """Utility functions/classes needed internally by the plugin."""
 
 # Python 3 imports
+import importlib
 import inspect
+import pkgutil
 
 __all__ = (
     'ClassProperty',
@@ -95,3 +97,31 @@ def get_classes_from_module(module, *, private=False, imported=False):
         if not imported and obj.__module__ == module.__name__:
             continue
         yield obj
+
+
+def get_classes_from_package(package_path, *,
+        private_modules=False, private_classes=False, imported_classes=False,
+        recursive=True):
+    """Yield classes from all modules of a package.
+
+    :param module package_path:
+        Path to the package to get the classes from
+    :param bool private_modules:
+        Seek for classes inside of modules with leading underscore
+    :param bool private_classes:
+        Yield classes prefixed with underscore
+    :param bool imported_classes:
+        Yield classes imported from other modules
+    :param bool recursive:
+        Recursively also get classes from subpackages
+    """
+    for finder, module_name, ispkg in pkgutil.iter_modules(package_path):
+        if not private_modules and module_name.startswith('_'):
+            continue
+        path = '.'.join((package_path, module_name))
+        if recursive and ispkg:
+            yield from get_classes_from_package(path)
+        else:
+            module = importlib.import_module(path)
+            yield from get_classes_from_module(
+                module, private=private_classes, imported=imported_classes)
