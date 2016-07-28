@@ -1,5 +1,8 @@
 """Utility functions/classes needed internally by the plugin."""
 
+# Python 3 imports
+import inspect
+
 __all__ = (
     'ClassProperty',
 )
@@ -72,3 +75,23 @@ class ClassProperty:
         if type_ is None and obj is not None:
             type_ = type(obj)
         return self.fget(type_)
+
+
+def get_classes_from_module(module, *, private=False, imported=False):
+    """Yield classes from a module.
+
+    :param module module:
+        Module to get the classes from
+    :param bool private:
+        Yield classes prefixed with an underscore
+    :param bool imported:
+        Yield classes imported from other modules
+    """
+    for obj_name, obj in inspect.getmembers(module):
+        if not private and obj_name.startswith('_'):
+            continue
+        if not inspect.isclass(obj):
+            continue
+        if not imported and obj.__module__ == module.__name__:
+            continue
+        yield obj
