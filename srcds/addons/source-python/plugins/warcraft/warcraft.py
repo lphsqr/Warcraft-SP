@@ -285,7 +285,7 @@ def _on_change_hero_menu_build(menu, player_index):
     total_level = player.calculate_total_level()
     for hero_id, hero_class in heroes.items():
         if hero_id in player.heroes or hero_class.required_level <= total_level:
-            text = _tr['Owned Hero Text'].get_string(hero=player.hero)
+            text = _tr['Owned Hero Text'].get_string(hero=player.heroes[hero_id])
             menu.append(PagedOption(text, hero_class, True, True))
         else:
             text = _tr['Unowned Hero Text'].get_string(hero=hero_class)
