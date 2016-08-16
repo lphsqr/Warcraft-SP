@@ -1,7 +1,7 @@
 """Package which imports all hero classes from all modules."""
 
 # Warcraft imports
-from warcraft._utilities import get_classes_from_package
+from warcraft.utilities import get_classes_from_package
 from warcraft.entities import Hero
 
 __all__ = (

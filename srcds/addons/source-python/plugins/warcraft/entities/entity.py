@@ -4,7 +4,7 @@
 import math
 
 # Warcraft imports
-from warcraft._utilities import ClassProperty
+from warcraft.utilities import ClassProperty
 
 __all__ = (
     'Entity',
