@@ -3,6 +3,10 @@
 # Python 3 imports
 import math
 
+# SQLAlchemy imports
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.ext.hybrid import hybrid_property
+
 # Warcraft imports
 from warcraft.utilities import ClassProperty
 
@@ -16,9 +20,6 @@ class Entity:
 
     Implements the following common class properties:
 
-    - ``class_id`` (:class:`str`):
-        An unique identifier for the entity class. Automatically
-        retrieved from the class's ``__qualname__``.
     - ``name`` (:class:`str`)
         The display name of the class. Automatically retrieved
         from the class's ``__name__``, replacing all the underscores
@@ -40,9 +41,8 @@ class Entity:
     method for managing the instance's current level.
     """
 
-    @ClassProperty
-    def class_id(cls):
-        return cls.__qualname__
+    id = Column(Integer, primary_key=True)
+    _level = Column('level', Integer)
 
     @ClassProperty
     def name(cls):
@@ -66,7 +66,7 @@ class Entity:
         self.owner = owner
         self._level = level
 
-    @property
+    @hybird_property
     def level(self):
         return self._level
 
