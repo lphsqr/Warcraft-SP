@@ -4,7 +4,13 @@
 import collections
 import math
 
+# SQLAlchemy imports
+from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.orm import relationship
+
 # Warcraft imports
+import warcraft.database
 from warcraft.entities.entity import Entity
 import warcraft.listeners
 
@@ -13,7 +19,7 @@ __all__ = (
 )
 
 
-class _HeroMeta(type):
+class _HeroMeta(type(warcraft.database.Base)):
     """Metaclass for handling hero classes' skills.
 
     Adds a :attr:`skill_classes` list to all hero classes for storing
@@ -47,24 +53,12 @@ class _HeroMeta(type):
         cls.skill_classes.append(skill_class)
         return skill_class
 
-    def __call__(cls, *args, **kwargs):
-        """Instantiate the class and give it instances of its skills.
 
-        Adds an instance of each skill class in the hero class's
-        :attr:`skill_classes` list to the hero being instantiated.
-        """
-        instance = super().__call__(*args, **kwargs)
-        for skill_class in cls.skill_classes:
-            instance.skills[skill_class.class_id] = skill_class(instance)
-        return instance
-
-
-class Hero(Entity, metaclass=_HeroMeta):
-    """The main entity and idea of the plugin.
+class Hero(Entity, warcraft.database.Base, metaclass=_HeroMeta):
+    """The main entity and the idea of the plugin.
 
     Each hero has its own unique set of skills which give
-    the hero/player additional powers and improve his stats.
-
+    the hero/player additional powers and improve his stats.  
     These skills can be upgraded to be more powerful with
     :attr:`skill_points`, which are rewarded from leveling up.
 
@@ -78,8 +72,12 @@ class Hero(Entity, metaclass=_HeroMeta):
     Upon a hero reaching its maximum level (if any), the quota will
     jump up to infinite (``math.inf``).
     """
+    __tablename__ = 'hero'
+    player_id = Column(String(21), ForeignKey('player.id'), primary_key=True)
+    _xp = Column('xp', Integer)
+    skills = relationship('Skill')
 
-    def __init__(self, owner, level=0, xp=0):
+    def __init__(self, owner, level=0, xp=0, skills=None):
         """Initialize the hero entity.
 
         :param rpg.player.Player owner:
@@ -88,10 +86,15 @@ class Hero(Entity, metaclass=_HeroMeta):
             Initial level of the hero
         :param int xp:
             Initial xp of the hero
+        :param iterable skills:
+            List of the hero's skill instances
         """
         super().__init__(owner, level)
+        self.player_id = owner.id
         self._xp = xp
-        self.skills = collections.OrderedDict()
+        if skills is None:
+            skills = [skill_cls(self) for skill_cls in self.skill_classes]
+        self.skills = skills
 
     @property
     def xp(self):
@@ -165,7 +168,7 @@ class Hero(Entity, metaclass=_HeroMeta):
 
     @property
     def skill_points(self):
-        used_points = sum(skill.level for skill in self.skills.values())
+        used_points = sum(skill.level for skill in self.skills)
         return self.level - used_points
 
     def can_upgrade_skill(self, skill):
@@ -175,7 +178,7 @@ class Hero(Entity, metaclass=_HeroMeta):
         enough :attr:`skill_points` to upgrade the skill, and that
         the skill has not reached its maximum level yet.
         """
-        return (skill.class_id in self.skills and self.skill_points > 0
+        return (skill in self.skills and self.skill_points > 0
                 and not skill.on_max_level())
 
     def upgrade_skill(self, skill):
@@ -198,7 +201,7 @@ class Hero(Entity, metaclass=_HeroMeta):
         Makes sure that the hero actually owns the skill and that
         the skill is not already on level zero.
         """
-        return skill.class_id in self.skills and skill.level > 0
+        return skill in self.skills and skill.level > 0
 
     def downgrade_skill(self, skill):
         """Downgrade a skill to receive a skill point.
@@ -216,7 +219,7 @@ class Hero(Entity, metaclass=_HeroMeta):
 
     def reset_skills(self):
         """Reset all of the hero's skills back to level zero."""
-        for skill in self.skills.values():
+        for skill in self.skills:
             skill.level = 0
             warcraft.listeners.OnSkillDowngrade.manager.notify(
                 skill=skill, hero=self, player=self.owner)
@@ -227,6 +230,6 @@ class Hero(Entity, metaclass=_HeroMeta):
         Forwards the arguments to the ``execute`` method of the skills
         that have been upgraded to at least level one.
         """
-        for skill in self.skills.values():
+        for skill in self.skills:
             if skill.level > 0:
                 skill.execute(event_name, event_args)
