@@ -1,6 +1,11 @@
 """Contains the :class:`Skill` base class for all of the skills."""
 
+# SQLAlchemy imports
+from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy.ext.hybrid import hybrid_property
+
 # Warcraft imports
+import warcraft.database
 from warcraft.entities.entity import Entity
 
 __all__ = (
@@ -8,7 +13,7 @@ __all__ = (
 )
 
 
-class _SkillMeta(type):
+class _SkillMeta(type(warcraft.database.Base)):
     """Metaclass for managing skills' callbacks.
 
     Adds an :attr:`_event_callbacks` dictionary for each skill class
@@ -53,7 +58,8 @@ class _SkillMeta(type):
             for event_name in attr._events:
                 cls._event_callbacks[event_name] = attr
 
-class Skill(Entity, metaclass=_SkillMeta):
+
+class Skill(Entity, warcraft.database.Base, metaclass=_SkillMeta):
     """Base class for skills which grant special powers to heroes.
 
     These skills are leveled up by the owning
@@ -79,6 +85,19 @@ class Skill(Entity, metaclass=_SkillMeta):
     These registered callbacks will then be executed by
     the :meth:`execute` method automatically upon an event happening.
     """
+    __tablename__ = 'skill'
+    hero_id = Column(Integer, primary_key=True)
+
+    def __init__(self, owner, level=0):
+        """Initialize the skill.
+
+        :param object owner:
+            The hero who owns the skill
+        :param int level:
+            Initial level of the skill
+        """
+        super().__init__(owner, level)
+        self.hero_id = owner.id
 
     def execute(self, event_name, event_args):
         """Execute any registerd callbacks for the event.
