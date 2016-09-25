@@ -94,7 +94,7 @@ def get_classes_from_module(module, *, private=False, imported=False):
             continue
         if not inspect.isclass(obj):
             continue
-        if not imported and obj.__module__ == module.__name__:
+        if not imported and obj.__module__ != module.__name__:
             continue
         yield obj
 
